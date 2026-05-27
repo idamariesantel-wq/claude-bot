@@ -51,18 +51,26 @@ def get_token():
         json={"app_id": FEISHU_APP_ID, "app_secret": FEISHU_APP_SECRET},
         timeout=10
     )
-    return r.json().get("tenant_access_token", "")
+    data = r.json()
+    token = data.get("tenant_access_token", "")
+    print(f"TOKEN: {token[:20] if token else 'EMPTY'} code={data.get('code')} msg={data.get('msg')}")
+    return token
 
 
 def send_reply(chat_id, text):
     try:
         token = get_token()
-        requests.post(
+        if not token:
+            print("NO TOKEN - cannot send reply")
+            return
+        r = requests.post(
             "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id",
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             json={"receive_id": chat_id, "msg_type": "text", "content": json.dumps({"text": text})},
             timeout=10
         )
+        data = r.json()
+        print(f"SEND STATUS: {r.status_code} code={data.get('code')} msg={data.get('msg')}")
     except Exception as e:
         print(f"SEND ERROR: {e}")
 
