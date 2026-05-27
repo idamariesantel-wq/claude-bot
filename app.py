@@ -130,6 +130,7 @@ def webhook():
 
 
 def handle_event(body):
+    print(f"HANDLE EVENT: {json.dumps(body)[:300]}")
     event = body.get("event", {})
     msg = event.get("message", {})
     chat_id = msg.get("chat_id", "") or event.get("open_chat_id", "")
@@ -154,7 +155,11 @@ def handle_event(body):
     except Exception:
         text = ""
 
+    print(f"TEXT EXTRACTED: '{text}'")
+    print(f"CHAT ID: {chat_id}")
+    
     if not text:
+        print("TEXT IS EMPTY - returning early")
         return make_response(json.dumps({"code": 0}), 200, {"Content-Type": "application/json"})
 
     # Send welcome on first contact
