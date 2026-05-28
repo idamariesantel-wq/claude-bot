@@ -1,3 +1,12 @@
+
+def clean_response(text):
+    import re
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # **bold** -> bold
+    text = re.sub(r'\*(.+?)\*', r'\1', text)        # *italic* -> italic
+    text = re.sub(r'^#{1,3} (.+)$', r'\1:', text, flags=re.MULTILINE)  # ### Header -> Header:
+    text = re.sub(r'^[-*] ', '- ', text, flags=re.MULTILINE)  # normalize bullets
+    return text.strip()
+
 import os
 import json
 import re
@@ -58,7 +67,7 @@ def ask_claude(question):
         )
         data = r.json()
         if data.get("content"):
-            return data["content"][0]["text"]
+            return clean_response(data["content"][0]["text"])
         if data.get("error"):
             return "Error: " + data["error"].get("message", "unknown")
     except Exception as e:
